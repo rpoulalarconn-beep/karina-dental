@@ -4,17 +4,11 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
   <meta name="theme-color" content="#E8628A"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
   <title>Dra. Karina Ayala — Agenda Dental</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#FDF0F5;}
+    body{background:#FDF0F5;font-family:'Nunito',sans-serif;}
     ::-webkit-scrollbar{display:none;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
     @keyframes floatTooth{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -27,31 +21,19 @@
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel">
+<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+
 const { useState } = React;
 
-const Styles = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,500&family=Nunito:wght@300;400;500;600;700;800&display=swap');
-    *{box-sizing:border-box;margin:0;padding:0;}
-    ::-webkit-scrollbar{display:none;}
-    input,select,textarea,button{font-family:'Nunito',sans-serif;}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes floatTooth{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-    .fu{animation:fadeUp .38s ease both}
-    .fu2{animation:fadeUp .38s .08s ease both}
-    .float{animation:floatTooth 3s ease-in-out infinite}
-    select option{background:#fff;color:#3D2A35;}
-  `}</style>
-);
-
 const P = {
-  rose:   "#E8628A", roseD: "#C94872", roseL: "#F7C5D5",
-  roseBg: "#FDF0F5", blush: "#FDE8EF",
-  gold:   "#D4967A", goldL: "#FBE9E0",
-  plum:   "#3D2A35", plumL: "#7A5568", muted: "#B8909F",
-  mint:   "#5BC4A8", mintBg:"#E8F8F4",
-  red:    "#E05C6A", white: "#FFFFFF",
+  rose:"#E8628A", roseD:"#C94872", roseL:"#F7C5D5",
+  roseBg:"#FDF0F5", blush:"#FDE8EF",
+  gold:"#D4967A", goldL:"#FBE9E0",
+  plum:"#3D2A35", plumL:"#7A5568", muted:"#B8909F",
+  mint:"#5BC4A8", red:"#E05C6A", white:"#FFFFFF",
 };
 
 const TRATAMIENTOS = [
@@ -65,260 +47,114 @@ const HORAS = [
   "11:00","11:30","12:00","12:30","14:00","14:30","15:00","15:30",
   "16:00","16:30","17:00","17:30","18:00",
 ];
-const DEMO_PATIENTS = [
-  { id:1, nombre:"María García", telefono:"300 123 4567", email:"maria@email.com", fechaNacimiento:"1985-03-12",
-    historial:[{ fecha:"2024-11-20", tratamiento:"Limpieza y profilaxis",
-      notas:"Sarro leve en sector anterior. Sangrado en encías superior derecha.",
-      pendiente:"Control caries molar 36" }] },
-  { id:2, nombre:"Carlos Ruiz", telefono:"311 987 6543", email:"carlos@email.com", fechaNacimiento:"1990-07-25",
-    historial:[{ fecha:"2025-01-15", tratamiento:"Extracción molar del juicio",
-      notas:"Sin complicaciones. Antibiótico amoxicilina 5 días.",
-      pendiente:"Control postoperatorio 7 días" }] },
-  { id:3, nombre:"Lucía Herrera", telefono:"315 444 2200", email:"lucia@email.com", fechaNacimiento:"2001-12-01",
-    historial:[] },
+const DEMO = [
+  {id:1,nombre:"María García",telefono:"300 123 4567",email:"maria@email.com",fechaNacimiento:"1985-03-12",
+   historial:[{fecha:"2024-11-20",tratamiento:"Limpieza y profilaxis",notas:"Sarro leve. Sangrado en encías superior derecha.",pendiente:"Control caries molar 36"}]},
+  {id:2,nombre:"Carlos Ruiz",telefono:"311 987 6543",email:"carlos@email.com",fechaNacimiento:"1990-07-25",
+   historial:[{fecha:"2025-01-15",tratamiento:"Extracción molar del juicio",notas:"Sin complicaciones. Antibiótico 5 días.",pendiente:"Control postoperatorio"}]},
+  {id:3,nombre:"Lucía Herrera",telefono:"315 444 2200",email:"",fechaNacimiento:"2001-12-01",historial:[]},
 ];
 
 function hoy(){ return new Date().toISOString().split("T")[0]; }
 function mañana(){ const d=new Date(); d.setDate(d.getDate()+1); return d.toISOString().split("T")[0]; }
-function fmtDate(d){ if(!d)return""; const[y,m,day]=d.split("-"); return `${day}/${m}/${y}`; }
-function diasLabel(fecha){
-  const diff=Math.ceil((new Date(fecha)-new Date(hoy()))/(1000*60*60*24));
-  if(diff<0)  return {label:"Vencida", bg:P.red,  color:"#fff"};
-  if(diff===0)return {label:"¡Hoy!",   bg:P.gold, color:"#fff"};
-  if(diff<=2) return {label:`En ${diff}d`, bg:"#F59E0B", color:"#fff"};
-  return          {label:`En ${diff}d`, bg:P.mint, color:"#fff"};
+function fmt(d){ if(!d)return""; const[y,m,day]=d.split("-"); return `${day}/${m}/${y}`; }
+function diasLabel(f){
+  const diff=Math.ceil((new Date(f)-new Date(hoy()))/(86400000));
+  if(diff<0) return {label:"Vencida",bg:P.red,c:"#fff"};
+  if(diff===0) return {label:"¡Hoy!",bg:P.gold,c:"#fff"};
+  if(diff<=2) return {label:`En ${diff}d`,bg:"#F59E0B",c:"#fff"};
+  return {label:`En ${diff}d`,bg:P.mint,c:"#fff"};
 }
 
-/* ── Logo SVG ── */
-function Logo({size=44}){
+function Logo(){
   return (
-    <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
+    <svg width="44" height="44" viewBox="0 0 80 80" fill="none">
       <circle cx="40" cy="40" r="38" fill="rgba(255,255,255,0.22)"/>
       <circle cx="40" cy="40" r="34" fill="rgba(255,255,255,0.15)"/>
-      {/* diente */}
-      <path d="M27 29C27 22 33 17 40 17C47 17 53 22 53 29C53 35 51 40 49 46C48 50 47 57 45 61C44 64 42 65 40 65C38 65 36 64 35 61C33 57 32 50 31 46C29 40 27 35 27 29Z"
-        fill="white" opacity="0.95"/>
-      <line x1="40" y1="21" x2="40" y2="59" stroke={P.roseL} strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M27 29C27 22 33 17 40 17C47 17 53 22 53 29C53 35 51 40 49 46C48 50 47 57 45 61C44 64 42 65 40 65C38 65 36 64 35 61C33 57 32 50 31 46C29 40 27 35 27 29Z" fill="white" opacity="0.95"/>
+      <line x1="40" y1="21" x2="40" y2="59" stroke="#F7C5D5" strokeWidth="1.5" strokeLinecap="round"/>
       <ellipse cx="34" cy="28" rx="3" ry="5" fill="white" opacity="0.35" transform="rotate(-15 34 28)"/>
-      {/* pequeña estrella decorativa */}
       <circle cx="58" cy="18" r="3" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="64" cy="26" r="1.5" fill="rgba(255,255,255,0.4)"/>
     </svg>
-  );
-}
-
-/* ── Brand Header ── */
-function BrandHeader(){
-  return (
-    <header style={{background:`linear-gradient(135deg, #C94872 0%, ${P.rose} 55%, #E8889F 100%)`, padding:"14px 18px 13px", position:"sticky", top:0, zIndex:50, boxShadow:`0 4px 24px #E8628A44`}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <Logo size={46}/>
-          <div>
-            <div style={{fontFamily:"'Playfair Display',serif",color:"#fff",fontSize:19,fontWeight:700,letterSpacing:0.2,lineHeight:1.15,textShadow:"0 1px 4px rgba(0,0,0,0.15)"}}>
-              Dra. Karina Ayala
-            </div>
-            <div style={{color:"rgba(255,255,255,0.85)",fontSize:10.5,fontWeight:600,letterSpacing:1.8,textTransform:"uppercase",marginTop:1}}>
-              Odontología · Estética Dental
-            </div>
-          </div>
-        </div>
-        <div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.2)",borderRadius:20,padding:"5px 11px",backdropFilter:"blur(8px)"}}>
-          <div style={{width:7,height:7,borderRadius:"50%",background:"#4ADE80",boxShadow:"0 0 7px #4ADE80"}}/>
-          <span style={{color:"rgba(255,255,255,0.92)",fontSize:11,fontWeight:700}}>
-            {new Date().toLocaleDateString("es-CO",{weekday:"short",day:"numeric",month:"short"})}
-          </span>
-        </div>
-      </div>
-    </header>
   );
 }
 
 function Toast({toast}){
   if(!toast) return null;
-  return (
-    <div style={{position:"fixed",top:76,left:"50%",transform:"translateX(-50%)",background:toast.type==="err"?P.red:P.mint,color:"#fff",borderRadius:14,padding:"10px 22px",fontSize:14,fontWeight:700,zIndex:200,boxShadow:"0 4px 20px rgba(0,0,0,0.15)",whiteSpace:"nowrap",pointerEvents:"none"}}>
-      {toast.type==="err"?"⚠ ":"✓ "}{toast.msg}
-    </div>
-  );
+  return <div style={{position:"fixed",top:76,left:"50%",transform:"translateX(-50%)",background:toast.err?P.red:P.mint,color:"#fff",borderRadius:14,padding:"10px 22px",fontSize:14,fontWeight:700,zIndex:200,boxShadow:"0 4px 20px rgba(0,0,0,0.15)",whiteSpace:"nowrap"}}>{toast.err?"⚠ ":"✓ "}{toast.msg}</div>;
 }
 
-/* ══ APP ══ */
-export default function App(){
-  const [view,setView]=useState("agenda");
-  const [patients,setPatients]=useState(DEMO_PATIENTS);
-  const [citas,setCitas]=useState([
-    {id:1,pacienteId:1,fecha:hoy(),hora:"09:00",tratamiento:"Control caries molar 36",confirmada:true,notas:""},
-    {id:2,pacienteId:2,fecha:hoy(),hora:"10:30",tratamiento:"Control postoperatorio",confirmada:false,notas:"Revisar cicatrización"},
-    {id:3,pacienteId:3,fecha:mañana(),hora:"08:30",tratamiento:"Primera consulta / diagnóstico",confirmada:true,notas:""},
-  ]);
-  const [selDate,setSelDate]=useState(hoy());
-  const [selPac,setSelPac]=useState(null);
-  const [toast,setToast]=useState(null);
-  const [form,setForm]=useState({pacienteId:"",fecha:hoy(),hora:"09:00",tratamiento:"",notas:""});
-  const [pForm,setPForm]=useState({nombre:"",telefono:"",email:"",fechaNacimiento:"",motivoConsulta:"",antecedentes:""});
+function Lbl({children}){ return <div style={{fontSize:13,fontWeight:700,color:P.plumL,marginBottom:5,marginTop:12}}>{children}</div>; }
 
-  function showToast(msg,type="ok"){ setToast({msg,type}); setTimeout(()=>setToast(null),3000); }
-  function getCitas(fecha){ return citas.filter(c=>c.fecha===fecha).sort((a,b)=>a.hora.localeCompare(b.hora)); }
-  function getPaciente(id){ return patients.find(p=>p.id===id); }
+const IS={width:"100%",border:`1.5px solid ${P.roseL}`,borderRadius:13,padding:"11px 14px",fontSize:14,outline:"none",background:"#fff",color:P.plum,display:"block"};
 
-  function agendarCita(){
-    if(!form.pacienteId||!form.fecha||!form.hora||!form.tratamiento){ showToast("Completa todos los campos requeridos","err"); return; }
-    setCitas(prev=>[...prev,{id:Date.now(),pacienteId:parseInt(form.pacienteId),fecha:form.fecha,hora:form.hora,tratamiento:form.tratamiento,notas:form.notas,confirmada:false}]);
-    setForm({pacienteId:"",fecha:hoy(),hora:"09:00",tratamiento:"",notas:""});
-    setSelDate(form.fecha);
-    showToast("¡Cita agendada con éxito! 💖");
-    setView("agenda");
-  }
-
-  function guardarPaciente(){
-    if(!pForm.nombre||!pForm.telefono){ showToast("Nombre y teléfono son obligatorios","err"); return; }
-    setPatients(prev=>[...prev,{
-      id:Date.now(),nombre:pForm.nombre,telefono:pForm.telefono,email:pForm.email,fechaNacimiento:pForm.fechaNacimiento,
-      historial:pForm.motivoConsulta?[{fecha:hoy(),tratamiento:"Primera consulta",notas:pForm.motivoConsulta+(pForm.antecedentes?". Antecedentes: "+pForm.antecedentes:""),pendiente:""}]:[],
-    }]);
-    setPForm({nombre:"",telefono:"",email:"",fechaNacimiento:"",motivoConsulta:"",antecedentes:""});
-    showToast("Paciente registrada ✨");
-    setView("pacientes");
-  }
-
-  function toggleConfirm(id){ setCitas(prev=>prev.map(c=>c.id===id?{...c,confirmada:!c.confirmada}:c)); }
-  function eliminarCita(id){ setCitas(prev=>prev.filter(c=>c.id!==id)); showToast("Cita eliminada"); }
-
-  const diasConCitas={};
-  citas.forEach(c=>{ diasConCitas[c.fecha]=(diasConCitas[c.fecha]||0)+1; });
-
-  const navItems=[
-    {id:"agenda", icon:"📅", label:"Agenda"},
-    {id:"nueva",  icon:"✚",  label:"Nueva cita", primary:true},
-    {id:"pacientes",icon:"👥",label:"Pacientes"},
-  ];
-
-  return (
-    <div style={{fontFamily:"'Nunito',sans-serif",maxWidth:430,margin:"0 auto",background:P.roseBg,minHeight:"100vh",display:"flex",flexDirection:"column"}}>
-      <Styles/>
-      <BrandHeader/>
-      <Toast toast={toast}/>
-      <main style={{flex:1,padding:"16px 16px 96px",overflowY:"auto"}}>
-        {view==="agenda"    && <AgendaView {...{citas,selDate,setSelDate,getCitas,getPaciente,toggleConfirm,eliminarCita,setView,setSelPac,diasConCitas}}/>}
-        {view==="pacientes" && <PacientesView {...{patients,setSelPac,setView}}/>}
-        {view==="nueva"     && <NuevaCitaView {...{form,setForm,patients,agendarCita,setView}}/>}
-        {view==="nuevo-pac" && <NuevoPacienteView {...{pForm,setPForm,guardarPaciente,setView}}/>}
-        {view==="detalle"   && selPac && <DetalleView paciente={selPac} setView={setView} citas={citas}/>}
-      </main>
-      <nav style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:430,background:"#fff",borderTop:`1.5px solid ${P.roseL}`,display:"flex",alignItems:"center",justifyContent:"space-around",padding:"8px 8px 14px",zIndex:40,boxShadow:"0 -4px 24px rgba(232,98,138,0.10)"}}>
-        {navItems.map(n=>(
-          <button key={n.id} onClick={()=>setView(n.id)} style={n.primary?{
-            display:"flex",flexDirection:"column",alignItems:"center",gap:2,
-            background:`linear-gradient(135deg,${P.rose},${P.roseD})`,border:"none",cursor:"pointer",
-            padding:"11px 26px",borderRadius:18,color:"#fff",
-            boxShadow:`0 4px 18px ${P.roseL}`,fontSize:13,fontWeight:800,
-          }:{
-            display:"flex",flexDirection:"column",alignItems:"center",gap:2,
-            background:view===n.id?P.blush:"none",border:"none",cursor:"pointer",
-            padding:"6px 20px",borderRadius:14,
-            color:view===n.id?P.rose:P.muted,transition:"all .2s",
-          }}>
-            <span style={{fontSize:20}}>{n.icon}</span>
-            <span style={{fontSize:11,fontWeight:700}}>{n.label}</span>
-          </button>
-        ))}
-      </nav>
-    </div>
-  );
+function BtnP({onClick,children}){
+  return <button onClick={onClick} style={{width:"100%",background:`linear-gradient(135deg,${P.rose},${P.roseD})`,color:"#fff",border:"none",borderRadius:16,padding:14,fontSize:15,fontWeight:800,cursor:"pointer",marginTop:22,boxShadow:`0 6px 18px ${P.roseL}`}}>{children}</button>;
 }
-
-/* ══ AGENDA VIEW ══ */
-function AgendaView({citas,selDate,setSelDate,getCitas,getPaciente,toggleConfirm,eliminarCita,setView,setSelPac,diasConCitas}){
-  const citasDia=getCitas(selDate);
-  const dias=Array.from({length:14},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()+i); return d.toISOString().split("T")[0]; });
-  return (
-    <div className="fu">
-      {/* Stats */}
-      <div style={{display:"flex",gap:10,marginBottom:16}}>
-        {[
-          {n:getCitas(hoy()).length, label:"Hoy"},
-          {n:getCitas(hoy()).filter(c=>c.confirmada).length, label:"Confirmadas"},
-          {n:citas.filter(c=>c.fecha>=hoy()).length, label:"Próximas"},
-        ].map((s,i)=>(
-          <div key={i} style={{flex:1,background:"#fff",borderRadius:16,padding:"12px 8px",textAlign:"center",boxShadow:`0 2px 12px ${P.roseL}55`}}>
-            <div style={{fontSize:24,fontWeight:900,color:P.rose,fontFamily:"'Playfair Display',serif"}}>{s.n}</div>
-            <div style={{fontSize:10,color:P.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginTop:2}}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Calendario horizontal */}
-      <div style={{display:"flex",gap:7,overflowX:"auto",paddingBottom:6,marginBottom:16}}>
-        {dias.map(d=>{
-          const fecha=new Date(d+"T12:00:00");
-          const sel=d===selDate;
-          return (
-            <button key={d} onClick={()=>setSelDate(d)} style={{
-              minWidth:46,display:"flex",flexDirection:"column",alignItems:"center",
-              padding:"8px 5px",borderRadius:14,border:"none",cursor:"pointer",
-              background:sel?`linear-gradient(135deg,${P.rose},${P.roseD})`:"#fff",
-              boxShadow:sel?`0 4px 14px ${P.roseL}99`:`0 1px 6px ${P.roseL}44`,
-              transition:"all .2s",
-            }}>
-              <span style={{fontSize:10,fontWeight:800,textTransform:"uppercase",letterSpacing:.5,color:sel?"rgba(255,255,255,.8)":P.muted}}>
-                {fecha.toLocaleDateString("es",{weekday:"short"}).slice(0,3)}
-              </span>
-              <span style={{fontSize:19,fontWeight:900,color:sel?"#fff":P.plum,lineHeight:1.3}}>{fecha.getDate()}</span>
-              {(diasConCitas[d]||0)>0 && <div style={{width:6,height:6,borderRadius:"50%",background:sel?"rgba(255,255,255,.9)":P.rose,marginTop:2}}/>}
-            </button>
-          );
-        })}
-      </div>
-
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-        <span style={{fontSize:16,fontWeight:800,color:P.plum}}>{selDate===hoy()?"Citas de hoy 💖":`Citas · ${fmtDate(selDate)}`}</span>
-        <span style={{background:P.blush,color:P.rose,borderRadius:20,padding:"3px 12px",fontSize:13,fontWeight:800}}>{citasDia.length}</span>
-      </div>
-
-      {citasDia.length===0?(
-        <div style={{textAlign:"center",color:P.muted,padding:"40px 0"}}>
-          <div className="float" style={{fontSize:42,marginBottom:12}}>🦷</div>
-          <div style={{fontSize:15,fontWeight:600}}>Sin citas para este día</div>
-        </div>
-      ):citasDia.map(c=>(
-        <CitaCard key={c.id} cita={c} paciente={getPaciente(c.pacienteId)}
-          onToggle={()=>toggleConfirm(c.id)} onDelete={()=>eliminarCita(c.id)}
-          onVer={()=>{ setSelPac(getPaciente(c.pacienteId)); setView("detalle"); }}/>
-      ))}
-    </div>
-  );
+function BtnS({onClick,children}){
+  return <button onClick={onClick} style={{width:"100%",background:P.blush,color:P.rose,border:"none",borderRadius:16,padding:12,fontSize:14,fontWeight:700,cursor:"pointer",marginTop:10}}>{children}</button>;
 }
 
 function CitaCard({cita,paciente,onToggle,onDelete,onVer}){
   const [open,setOpen]=useState(false);
   return (
     <div style={{background:"#fff",borderRadius:18,padding:14,marginBottom:10,display:"flex",gap:12,alignItems:"flex-start",boxShadow:`0 2px 14px ${P.roseL}44`,borderLeft:`4px solid ${cita.confirmada?P.mint:P.roseL}`,cursor:"pointer"}} onClick={()=>setOpen(!open)}>
-      <div style={{background:P.blush,color:P.rose,fontWeight:900,fontSize:13,borderRadius:10,padding:"8px 7px",minWidth:52,textAlign:"center",lineHeight:1.2,flexShrink:0}}>
-        {cita.hora}
-      </div>
+      <div style={{background:P.blush,color:P.rose,fontWeight:900,fontSize:13,borderRadius:10,padding:"8px 7px",minWidth:52,textAlign:"center",flexShrink:0}}>{cita.hora}</div>
       <div style={{flex:1}}>
         <div style={{fontWeight:800,fontSize:15,color:P.plum}}>{paciente?.nombre||"—"}</div>
         <div style={{fontSize:13,color:P.plumL,marginTop:2}}>🦷 {cita.tratamiento}</div>
         {open&&cita.notas&&<div style={{fontSize:12,color:P.muted,marginTop:6,fontStyle:"italic"}}>📝 {cita.notas}</div>}
-        {open&&(
-          <div style={{display:"flex",gap:8,marginTop:10}}>
-            <button style={{background:P.blush,border:"none",borderRadius:10,padding:"6px 12px",fontSize:12,fontWeight:700,color:P.rose,cursor:"pointer"}} onClick={e=>{e.stopPropagation();onVer();}}>Ver historial</button>
-            <button style={{background:"#FFF0F0",border:"none",borderRadius:10,padding:"6px 12px",fontSize:12,fontWeight:700,color:P.red,cursor:"pointer"}} onClick={e=>{e.stopPropagation();onDelete();}}>Eliminar</button>
-          </div>
-        )}
+        {open&&<div style={{display:"flex",gap:8,marginTop:10}}>
+          <button style={{background:P.blush,border:"none",borderRadius:10,padding:"6px 12px",fontSize:12,fontWeight:700,color:P.rose,cursor:"pointer"}} onClick={e=>{e.stopPropagation();onVer();}}>Ver historial</button>
+          <button style={{background:"#FFF0F0",border:"none",borderRadius:10,padding:"6px 12px",fontSize:12,fontWeight:700,color:P.red,cursor:"pointer"}} onClick={e=>{e.stopPropagation();onDelete();}}>Eliminar</button>
+        </div>}
       </div>
       <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,flexShrink:0}}>
-        <button onClick={e=>{e.stopPropagation();onToggle();}} style={{width:34,height:34,borderRadius:"50%",border:"none",cursor:"pointer",background:cita.confirmada?P.mint:P.roseL,color:"#fff",fontWeight:900,fontSize:15,display:"flex",alignItems:"center",justifyContent:"center",transition:"all .2s"}}>
-          {cita.confirmada?"✓":"○"}
-        </button>
+        <button onClick={e=>{e.stopPropagation();onToggle();}} style={{width:34,height:34,borderRadius:"50%",border:"none",cursor:"pointer",background:cita.confirmada?P.mint:P.roseL,color:"#fff",fontWeight:900,fontSize:15,display:"flex",alignItems:"center",justifyContent:"center"}}>{cita.confirmada?"✓":"○"}</button>
         <span style={{fontSize:10,fontWeight:700,color:cita.confirmada?P.mint:P.muted}}>{cita.confirmada?"Conf.":"Pend."}</span>
       </div>
     </div>
   );
 }
 
-/* ══ PACIENTES VIEW ══ */
+function AgendaView({citas,selDate,setSelDate,getCitas,getPac,toggleConfirm,eliminarCita,setView,setSelPac,diasConCitas}){
+  const citasDia=getCitas(selDate);
+  const dias=Array.from({length:14},(_,i)=>{const d=new Date();d.setDate(d.getDate()+i);return d.toISOString().split("T")[0];});
+  return (
+    <div className="fu">
+      <div style={{display:"flex",gap:10,marginBottom:16}}>
+        {[{n:getCitas(hoy()).length,l:"Hoy"},{n:getCitas(hoy()).filter(c=>c.confirmada).length,l:"Confirmadas"},{n:citas.filter(c=>c.fecha>=hoy()).length,l:"Próximas"}].map((s,i)=>(
+          <div key={i} style={{flex:1,background:"#fff",borderRadius:16,padding:"12px 8px",textAlign:"center",boxShadow:`0 2px 12px ${P.roseL}55`}}>
+            <div style={{fontSize:24,fontWeight:900,color:P.rose,fontFamily:"'Playfair Display',serif"}}>{s.n}</div>
+            <div style={{fontSize:10,color:P.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:.5,marginTop:2}}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{display:"flex",gap:7,overflowX:"auto",paddingBottom:6,marginBottom:16}}>
+        {dias.map(d=>{
+          const fecha=new Date(d+"T12:00:00");
+          const sel=d===selDate;
+          return (
+            <button key={d} onClick={()=>setSelDate(d)} style={{minWidth:46,display:"flex",flexDirection:"column",alignItems:"center",padding:"8px 5px",borderRadius:14,border:"none",cursor:"pointer",background:sel?`linear-gradient(135deg,${P.rose},${P.roseD})`:"#fff",boxShadow:sel?`0 4px 14px ${P.roseL}99`:`0 1px 6px ${P.roseL}44`}}>
+              <span style={{fontSize:10,fontWeight:800,textTransform:"uppercase",color:sel?"rgba(255,255,255,.8)":P.muted}}>{fecha.toLocaleDateString("es",{weekday:"short"}).slice(0,3)}</span>
+              <span style={{fontSize:19,fontWeight:900,color:sel?"#fff":P.plum,lineHeight:1.3}}>{fecha.getDate()}</span>
+              {(diasConCitas[d]||0)>0&&<div style={{width:6,height:6,borderRadius:"50%",background:sel?"rgba(255,255,255,.9)":P.rose,marginTop:2}}/>}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+        <span style={{fontSize:16,fontWeight:800,color:P.plum}}>{selDate===hoy()?"Citas de hoy 💖":`Citas · ${fmt(selDate)}`}</span>
+        <span style={{background:P.blush,color:P.rose,borderRadius:20,padding:"3px 12px",fontSize:13,fontWeight:800}}>{citasDia.length}</span>
+      </div>
+      {citasDia.length===0
+        ?<div style={{textAlign:"center",color:P.muted,padding:"40px 0"}}><div className="float" style={{fontSize:42,marginBottom:12}}>🦷</div><div style={{fontSize:15,fontWeight:600}}>Sin citas para este día</div></div>
+        :citasDia.map(c=><CitaCard key={c.id} cita={c} paciente={getPac(c.pacienteId)} onToggle={()=>toggleConfirm(c.id)} onDelete={()=>eliminarCita(c.id)} onVer={()=>{setSelPac(getPac(c.pacienteId));setView("detalle");}}/>)
+      }
+    </div>
+  );
+}
+
 function PacientesView({patients,setSelPac,setView}){
   const [q,setQ]=useState("");
   const list=patients.filter(p=>p.nombre.toLowerCase().includes(q.toLowerCase())||p.telefono.includes(q));
@@ -328,16 +164,13 @@ function PacientesView({patients,setSelPac,setView}){
         <input style={{flex:1,border:`1.5px solid ${P.roseL}`,borderRadius:14,padding:"11px 14px",fontSize:14,outline:"none",background:"#fff",color:P.plum}} placeholder="🔍  Buscar paciente..." value={q} onChange={e=>setQ(e.target.value)}/>
         <button style={{background:`linear-gradient(135deg,${P.rose},${P.roseD})`,color:"#fff",border:"none",borderRadius:14,padding:"11px 16px",fontWeight:800,fontSize:14,cursor:"pointer"}} onClick={()=>setView("nuevo-pac")}>+ Nueva</button>
       </div>
-      {list.length===0&&<div style={{textAlign:"center",color:P.muted,padding:"40px 0",fontSize:15}}>Sin resultados 🔍</div>}
       {list.map(p=>(
         <div key={p.id} style={{background:"#fff",borderRadius:18,padding:14,marginBottom:10,display:"flex",alignItems:"center",gap:12,boxShadow:`0 2px 12px ${P.roseL}44`,cursor:"pointer"}} onClick={()=>{setSelPac(p);setView("detalle");}}>
-          <div style={{width:46,height:46,borderRadius:"50%",background:`linear-gradient(135deg,${P.rose},${P.roseD})`,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:900,flexShrink:0}}>
-            {p.nombre.charAt(0)}
-          </div>
+          <div style={{width:46,height:46,borderRadius:"50%",background:`linear-gradient(135deg,${P.rose},${P.roseD})`,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,fontWeight:900,flexShrink:0}}>{p.nombre.charAt(0)}</div>
           <div style={{flex:1}}>
             <div style={{fontWeight:800,fontSize:15,color:P.plum}}>{p.nombre}</div>
             <div style={{fontSize:12,color:P.muted,marginTop:2}}>📞 {p.telefono}</div>
-            {p.historial.length>0&&<div style={{fontSize:11,color:P.plumL,marginTop:3}}>Última visita: {fmtDate(p.historial.slice(-1)[0].fecha)} · {p.historial.slice(-1)[0].tratamiento}</div>}
+            {p.historial.length>0&&<div style={{fontSize:11,color:P.plumL,marginTop:3}}>Última: {fmt(p.historial.slice(-1)[0].fecha)} · {p.historial.slice(-1)[0].tratamiento}</div>}
           </div>
           <span style={{fontSize:22,color:P.roseL}}>›</span>
         </div>
@@ -346,43 +179,38 @@ function PacientesView({patients,setSelPac,setView}){
   );
 }
 
-/* ══ DETALLE PACIENTE ══ */
 function DetalleView({paciente,setView,citas}){
   const proximas=citas.filter(c=>c.pacienteId===paciente.id&&c.fecha>=hoy()).sort((a,b)=>a.fecha.localeCompare(b.fecha));
   return (
     <div className="fu">
       <button style={{background:"none",border:"none",color:P.rose,fontSize:15,fontWeight:800,cursor:"pointer",padding:"0 0 14px",display:"block"}} onClick={()=>setView("pacientes")}>← Volver</button>
       <div style={{background:"#fff",borderRadius:20,padding:18,marginBottom:14,boxShadow:`0 2px 16px ${P.roseL}44`}}>
-        <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:4}}>
-          <div style={{width:56,height:56,borderRadius:"50%",background:`linear-gradient(135deg,${P.rose},${P.roseD})`,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:900,flexShrink:0}}>
-            {paciente.nombre.charAt(0)}
-          </div>
+        <div style={{display:"flex",alignItems:"center",gap:14}}>
+          <div style={{width:56,height:56,borderRadius:"50%",background:`linear-gradient(135deg,${P.rose},${P.roseD})`,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,fontWeight:900,flexShrink:0}}>{paciente.nombre.charAt(0)}</div>
           <div>
             <div style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:700,color:P.plum}}>{paciente.nombre}</div>
             <div style={{fontSize:13,color:P.muted,marginTop:3}}>📞 {paciente.telefono}</div>
             {paciente.email&&<div style={{fontSize:13,color:P.muted}}>✉ {paciente.email}</div>}
-            {paciente.fechaNacimiento&&<div style={{fontSize:13,color:P.muted}}>🎂 {fmtDate(paciente.fechaNacimiento)}</div>}
+            {paciente.fechaNacimiento&&<div style={{fontSize:13,color:P.muted}}>🎂 {fmt(paciente.fechaNacimiento)}</div>}
           </div>
         </div>
       </div>
-
       {proximas.length>0&&<>
         <div style={{fontSize:15,fontWeight:800,color:P.plum,marginBottom:8}}>Próximas citas 📅</div>
-        {proximas.map(c=>{ const dl=diasLabel(c.fecha); return (
+        {proximas.map(c=>{const dl=diasLabel(c.fecha);return(
           <div key={c.id} style={{background:"#fff",borderRadius:14,padding:"12px 14px",marginBottom:8,display:"flex",alignItems:"center",gap:10,boxShadow:`0 1px 8px ${P.roseL}33`}}>
-            <span style={{background:dl.bg,color:dl.color,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:800,flexShrink:0}}>{dl.label}</span>
-            <span style={{fontSize:13,fontWeight:700,color:P.plumL}}>{fmtDate(c.fecha)} {c.hora}</span>
+            <span style={{background:dl.bg,color:dl.c,borderRadius:8,padding:"3px 10px",fontSize:11,fontWeight:800,flexShrink:0}}>{dl.label}</span>
+            <span style={{fontSize:13,fontWeight:700,color:P.plumL}}>{fmt(c.fecha)} {c.hora}</span>
             <span style={{fontSize:13,color:P.plum,flex:1}}>{c.tratamiento}</span>
           </div>
         );})}
       </>}
-
       <div style={{fontSize:15,fontWeight:800,color:P.plum,margin:"14px 0 8px"}}>Historial clínico 🦷</div>
       {paciente.historial.length===0
-        ?<div style={{textAlign:"center",color:P.muted,padding:"24px 0",fontSize:14}}>Sin registros aún</div>
+        ?<div style={{textAlign:"center",color:P.muted,padding:"24px 0"}}>Sin registros aún</div>
         :[...paciente.historial].reverse().map((h,i)=>(
           <div key={i} style={{background:"#fff",borderRadius:16,padding:14,marginBottom:10,boxShadow:`0 2px 12px ${P.roseL}33`,borderLeft:`4px solid ${P.rose}`}}>
-            <div style={{fontSize:11,fontWeight:800,color:P.muted,textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>📅 {fmtDate(h.fecha)}</div>
+            <div style={{fontSize:11,fontWeight:800,color:P.muted,textTransform:"uppercase",letterSpacing:.5,marginBottom:4}}>📅 {fmt(h.fecha)}</div>
             <div style={{fontWeight:800,fontSize:15,color:P.plum}}>🦷 {h.tratamiento}</div>
             {h.notas&&<div style={{fontSize:13,color:P.plumL,marginTop:6,lineHeight:1.6}}>📝 {h.notas}</div>}
             {h.pendiente&&<div style={{fontSize:13,color:P.gold,marginTop:6,fontWeight:700}}>⏳ Pendiente: {h.pendiente}</div>}
@@ -393,7 +221,6 @@ function DetalleView({paciente,setView,citas}){
   );
 }
 
-/* ══ NUEVA CITA FORM ══ */
 function NuevaCitaView({form,setForm,patients,agendarCita,setView}){
   const f=(k,v)=>setForm(p=>({...p,[k]:v}));
   const pac=patients.find(p=>p.id===parseInt(form.pacienteId));
@@ -402,50 +229,40 @@ function NuevaCitaView({form,setForm,patients,agendarCita,setView}){
     <div className="fu">
       <button style={{background:"none",border:"none",color:P.rose,fontSize:15,fontWeight:800,cursor:"pointer",padding:"0 0 14px",display:"block"}} onClick={()=>setView("agenda")}>← Volver</button>
       <div style={{fontFamily:"'Playfair Display',serif",fontSize:22,fontWeight:700,color:P.plum,marginBottom:18}}>Nueva cita 💖</div>
-
       <Lbl>Paciente *</Lbl>
       <select style={IS} value={form.pacienteId} onChange={e=>f("pacienteId",e.target.value)}>
         <option value="">— Seleccionar paciente —</option>
         {patients.map(p=><option key={p.id} value={p.id}>{p.nombre}</option>)}
       </select>
-
-      {ultima&&(
-        <div style={{background:P.blush,borderRadius:14,padding:14,marginTop:8,borderLeft:`4px solid ${P.rose}`}} className="fu2">
-          <div style={{fontWeight:800,fontSize:11,color:P.rose,textTransform:"uppercase",letterSpacing:.8,marginBottom:5}}>📋 Última visita — {fmtDate(ultima.fecha)}</div>
-          <div style={{fontSize:13,color:P.plumL}}><b>Tratamiento:</b> {ultima.tratamiento}</div>
-          {ultima.notas&&<div style={{fontSize:13,color:P.plumL,marginTop:3}}><b>Notas:</b> {ultima.notas}</div>}
-          {ultima.pendiente&&<div style={{fontSize:13,color:P.gold,marginTop:4,fontWeight:700}}>⏳ {ultima.pendiente}</div>}
-        </div>
-      )}
-
+      {ultima&&<div style={{background:P.blush,borderRadius:14,padding:14,marginTop:8,borderLeft:`4px solid ${P.rose}`}} className="fu2">
+        <div style={{fontWeight:800,fontSize:11,color:P.rose,textTransform:"uppercase",letterSpacing:.8,marginBottom:5}}>📋 Última visita — {fmt(ultima.fecha)}</div>
+        <div style={{fontSize:13,color:P.plumL}}><b>Tratamiento:</b> {ultima.tratamiento}</div>
+        {ultima.notas&&<div style={{fontSize:13,color:P.plumL,marginTop:3}}><b>Notas:</b> {ultima.notas}</div>}
+        {ultima.pendiente&&<div style={{fontSize:13,color:P.gold,marginTop:4,fontWeight:700}}>⏳ {ultima.pendiente}</div>}
+      </div>}
       <div style={{display:"flex",gap:10}}>
         <div style={{flex:1}}><Lbl>Fecha *</Lbl><input style={IS} type="date" value={form.fecha} min={hoy()} onChange={e=>f("fecha",e.target.value)}/></div>
         <div style={{flex:1}}><Lbl>Hora *</Lbl><select style={IS} value={form.hora} onChange={e=>f("hora",e.target.value)}>{HORAS.map(h=><option key={h}>{h}</option>)}</select></div>
       </div>
-
       <Lbl>Motivo / Tratamiento *</Lbl>
       <select style={IS} value={form.tratamiento} onChange={e=>f("tratamiento",e.target.value)}>
         <option value="">— Seleccionar —</option>
         {TRATAMIENTOS.map(t=><option key={t}>{t}</option>)}
       </select>
-
       <Lbl>Notas adicionales</Lbl>
-      <textarea style={{...IS,height:80,resize:"none"}} placeholder="Indicaciones, observaciones, alertas..." value={form.notas} onChange={e=>f("notas",e.target.value)}/>
-
+      <textarea style={{...IS,height:80,resize:"none"}} placeholder="Indicaciones, observaciones..." value={form.notas} onChange={e=>f("notas",e.target.value)}/>
       <BtnP onClick={agendarCita}>Agendar cita ✓</BtnP>
       <BtnS onClick={()=>setView("nuevo-pac")}>+ Registrar nueva paciente</BtnS>
     </div>
   );
 }
 
-/* ══ NUEVO PACIENTE FORM ══ */
 function NuevoPacienteView({pForm,setPForm,guardarPaciente,setView}){
   const f=(k,v)=>setPForm(p=>({...p,[k]:v}));
   return (
     <div className="fu">
       <button style={{background:"none",border:"none",color:P.rose,fontSize:15,fontWeight:800,cursor:"pointer",padding:"0 0 14px",display:"block"}} onClick={()=>setView("pacientes")}>← Volver</button>
       <div style={{fontFamily:"'Playfair Display',serif",fontSize:22,fontWeight:700,color:P.plum,marginBottom:18}}>Nueva paciente ✨</div>
-
       <Lbl>Nombre completo *</Lbl>
       <input style={IS} placeholder="Ej. Laura Martínez" value={pForm.nombre} onChange={e=>f("nombre",e.target.value)}/>
       <Lbl>Teléfono *</Lbl>
@@ -455,20 +272,95 @@ function NuevoPacienteView({pForm,setPForm,guardarPaciente,setView}){
       <Lbl>Fecha de nacimiento</Lbl>
       <input style={IS} type="date" value={pForm.fechaNacimiento} onChange={e=>f("fechaNacimiento",e.target.value)}/>
       <Lbl>Motivo de primera consulta</Lbl>
-      <textarea style={{...IS,height:80,resize:"none"}} placeholder="¿Por qué viene? ¿Qué reporta la paciente?" value={pForm.motivoConsulta} onChange={e=>f("motivoConsulta",e.target.value)}/>
-      <Lbl>Antecedentes / Alergias / Medicamentos</Lbl>
-      <textarea style={{...IS,height:72,resize:"none"}} placeholder="Alergias, condiciones médicas, medicación..." value={pForm.antecedentes} onChange={e=>f("antecedentes",e.target.value)}/>
-
+      <textarea style={{...IS,height:80,resize:"none"}} placeholder="¿Por qué viene? ¿Qué reporta?" value={pForm.motivoConsulta} onChange={e=>f("motivoConsulta",e.target.value)}/>
+      <Lbl>Antecedentes / Alergias</Lbl>
+      <textarea style={{...IS,height:72,resize:"none"}} placeholder="Alergias, medicamentos, condiciones..." value={pForm.antecedentes} onChange={e=>f("antecedentes",e.target.value)}/>
       <BtnP onClick={guardarPaciente}>Guardar paciente ✓</BtnP>
     </div>
   );
 }
 
-/* ── Mini helpers ── */
-function Lbl({children}){ return <div style={{fontSize:13,fontWeight:700,color:P.plumL,marginBottom:5,marginTop:12}}>{children}</div>; }
-function BtnP({onClick,children}){ return <button onClick={onClick} style={{width:"100%",background:`linear-gradient(135deg,${P.rose},${P.roseD})`,color:"#fff",border:"none",borderRadius:16,padding:14,fontSize:15,fontWeight:800,cursor:"pointer",marginTop:22,boxShadow:`0 6px 18px ${P.roseL}`}}>{children}</button>; }
-function BtnS({onClick,children}){ return <button onClick={onClick} style={{width:"100%",background:P.blush,color:P.rose,border:"none",borderRadius:16,padding:12,fontSize:14,fontWeight:700,cursor:"pointer",marginTop:10}}>{children}</button>; }
-const IS={width:"100%",border:`1.5px solid ${P.roseL}`,borderRadius:13,padding:"11px 14px",fontSize:14,outline:"none",background:"#fff",color:P.plum,display:"block"};
+function App(){
+  const [view,setView]=useState("agenda");
+  const [patients,setPatients]=useState(DEMO);
+  const [citas,setCitas]=useState([
+    {id:1,pacienteId:1,fecha:hoy(),hora:"09:00",tratamiento:"Control caries molar 36",confirmada:true,notas:""},
+    {id:2,pacienteId:2,fecha:hoy(),hora:"10:30",tratamiento:"Control postoperatorio",confirmada:false,notas:"Revisar cicatrización"},
+    {id:3,pacienteId:3,fecha:mañana(),hora:"08:30",tratamiento:"Primera consulta",confirmada:true,notas:""},
+  ]);
+  const [selDate,setSelDate]=useState(hoy());
+  const [selPac,setSelPac]=useState(null);
+  const [toast,setToast]=useState(null);
+  const [form,setForm]=useState({pacienteId:"",fecha:hoy(),hora:"09:00",tratamiento:"",notas:""});
+  const [pForm,setPForm]=useState({nombre:"",telefono:"",email:"",fechaNacimiento:"",motivoConsulta:"",antecedentes:""});
+
+  function showToast(msg,err=false){setToast({msg,err});setTimeout(()=>setToast(null),3000);}
+  function getCitas(f){return citas.filter(c=>c.fecha===f).sort((a,b)=>a.hora.localeCompare(b.hora));}
+  function getPac(id){return patients.find(p=>p.id===id);}
+  function toggleConfirm(id){setCitas(prev=>prev.map(c=>c.id===id?{...c,confirmada:!c.confirmada}:c));}
+  function eliminarCita(id){setCitas(prev=>prev.filter(c=>c.id!==id));showToast("Cita eliminada");}
+
+  function agendarCita(){
+    if(!form.pacienteId||!form.fecha||!form.hora||!form.tratamiento){showToast("Completa todos los campos requeridos",true);return;}
+    setCitas(prev=>[...prev,{id:Date.now(),pacienteId:parseInt(form.pacienteId),fecha:form.fecha,hora:form.hora,tratamiento:form.tratamiento,notas:form.notas,confirmada:false}]);
+    setForm({pacienteId:"",fecha:hoy(),hora:"09:00",tratamiento:"",notas:""});
+    setSelDate(form.fecha);
+    showToast("¡Cita agendada con éxito! 💖");
+    setView("agenda");
+  }
+
+  function guardarPaciente(){
+    if(!pForm.nombre||!pForm.telefono){showToast("Nombre y teléfono son obligatorios",true);return;}
+    setPatients(prev=>[...prev,{id:Date.now(),nombre:pForm.nombre,telefono:pForm.telefono,email:pForm.email,fechaNacimiento:pForm.fechaNacimiento,historial:pForm.motivoConsulta?[{fecha:hoy(),tratamiento:"Primera consulta",notas:pForm.motivoConsulta+(pForm.antecedentes?". Antecedentes: "+pForm.antecedentes:""),pendiente:""}]:[]}]);
+    setPForm({nombre:"",telefono:"",email:"",fechaNacimiento:"",motivoConsulta:"",antecedentes:""});
+    showToast("Paciente registrada ✨");
+    setView("pacientes");
+  }
+
+  const diasConCitas={};
+  citas.forEach(c=>{diasConCitas[c.fecha]=(diasConCitas[c.fecha]||0)+1;});
+
+  return (
+    <div style={{fontFamily:"'Nunito',sans-serif",maxWidth:430,margin:"0 auto",background:P.roseBg,minHeight:"100vh",display:"flex",flexDirection:"column"}}>
+      <Toast toast={toast}/>
+      {/* HEADER */}
+      <header style={{background:`linear-gradient(135deg,#C94872 0%,${P.rose} 55%,#E8889F 100%)`,padding:"14px 18px 13px",position:"sticky",top:0,zIndex:50,boxShadow:`0 4px 24px #E8628A44`}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <Logo/>
+            <div>
+              <div style={{fontFamily:"'Playfair Display',serif",color:"#fff",fontSize:19,fontWeight:700,lineHeight:1.15}}>Dra. Karina Ayala</div>
+              <div style={{color:"rgba(255,255,255,0.85)",fontSize:10.5,fontWeight:600,letterSpacing:1.8,textTransform:"uppercase",marginTop:1}}>Odontología · Estética Dental</div>
+            </div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:6,background:"rgba(255,255,255,0.2)",borderRadius:20,padding:"5px 11px"}}>
+            <div style={{width:7,height:7,borderRadius:"50%",background:"#4ADE80",boxShadow:"0 0 7px #4ADE80"}}/>
+            <span style={{color:"rgba(255,255,255,0.92)",fontSize:11,fontWeight:700}}>{new Date().toLocaleDateString("es-CO",{weekday:"short",day:"numeric",month:"short"})}</span>
+          </div>
+        </div>
+      </header>
+
+      {/* MAIN */}
+      <main style={{flex:1,padding:"16px 16px 96px",overflowY:"auto"}}>
+        {view==="agenda"    && <AgendaView {...{citas,selDate,setSelDate,getCitas,getPac,toggleConfirm,eliminarCita,setView,setSelPac,diasConCitas}}/>}
+        {view==="pacientes" && <PacientesView {...{patients,setSelPac,setView}}/>}
+        {view==="nueva"     && <NuevaCitaView {...{form,setForm,patients,agendarCita,setView}}/>}
+        {view==="nuevo-pac" && <NuevoPacienteView {...{pForm,setPForm,guardarPaciente,setView}}/>}
+        {view==="detalle"   && selPac && <DetalleView paciente={selPac} setView={setView} citas={citas}/>}
+      </main>
+
+      {/* NAV */}
+      <nav style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:430,background:"#fff",borderTop:`1.5px solid ${P.roseL}`,display:"flex",alignItems:"center",justifyContent:"space-around",padding:"8px 8px 14px",zIndex:40,boxShadow:"0 -4px 24px rgba(232,98,138,0.10)"}}>
+        {[{id:"agenda",icon:"📅",label:"Agenda"},{id:"nueva",icon:"✚",label:"Nueva cita",primary:true},{id:"pacientes",icon:"👥",label:"Pacientes"}].map(n=>(
+          <button key={n.id} onClick={()=>setView(n.id)} style={n.primary?{display:"flex",flexDirection:"column",alignItems:"center",gap:2,background:`linear-gradient(135deg,${P.rose},${P.roseD})`,border:"none",cursor:"pointer",padding:"11px 26px",borderRadius:18,color:"#fff",boxShadow:`0 4px 18px ${P.roseL}`,fontSize:13,fontWeight:800}:{display:"flex",flexDirection:"column",alignItems:"center",gap:2,background:view===n.id?P.blush:"none",border:"none",cursor:"pointer",padding:"6px 20px",borderRadius:14,color:view===n.id?P.rose:P.muted}}>
+            <span style={{fontSize:20}}>{n.icon}</span>
+            <span style={{fontSize:11,fontWeight:700}}>{n.label}</span>
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App/>);
